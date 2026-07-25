@@ -1,0 +1,687 @@
+<!doctype html>
+<html lang="ht">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>MyPlopPlop — POS</title>
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<meta name="theme-color" content="#D21034">
+<style>
+:root{
+  --red:#D21034; --blue:#00209F; --ink:#14161d; --muted:#6b7280;
+  --bg:#f1f2f6; --card:#fff; --line:#e3e6ee; --good:#12a150; --warn:#e08a00;
+  --shadow:0 2px 10px rgba(20,25,50,.08); --shadow-lg:0 10px 30px rgba(20,25,50,.16); --r:16px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);
+  line-height:1.4;padding-bottom:150px;max-width:720px;margin:0 auto;min-height:100vh}
+button{font-family:inherit;cursor:pointer}img{display:block}
+.appbar{position:sticky;top:0;z-index:20;background:linear-gradient(120deg,var(--red),#a50f28);color:#fff;
+  padding:12px 14px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow)}
+.appbar .logo{width:38px;height:38px;border-radius:10px;background:#fff;padding:3px;object-fit:contain}
+.appbar h1{font-size:16px;margin:0;line-height:1.15;font-weight:800;flex:1}
+.appbar h1 small{display:block;font-weight:500;opacity:.85;font-size:11px;letter-spacing:.4px}
+.lang{display:flex;gap:4px;background:rgba(255,255,255,.15);border-radius:999px;padding:3px}
+.lang button{border:0;background:transparent;color:#fff;font-size:12px;font-weight:700;padding:5px 9px;border-radius:999px;opacity:.7}
+.lang button.on{background:#fff;color:var(--red);opacity:1}
+.gear{border:0;background:rgba(255,255,255,.16);color:#fff;width:34px;height:34px;border-radius:10px;font-size:17px}
+main{padding:16px 14px}
+.screen{display:none;animation:fade .22s ease}.screen.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.h2{font-size:20px;font-weight:800;margin:2px 0 4px}.sub{color:var(--muted);font-size:13px;margin:0 0 16px}
+.back{display:inline-flex;align-items:center;gap:6px;border:0;background:#fff;color:var(--red);font-weight:700;font-size:14px;padding:8px 12px;border-radius:999px;box-shadow:var(--shadow);margin-bottom:14px}
+/* home actions */
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.act{border:1px solid var(--line);background:var(--card);border-radius:var(--r);padding:22px 14px;text-align:center;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:10px;min-height:130px;justify-content:center;transition:transform .12s}
+.act:active{transform:scale(.97)}
+.act .ae{font-size:38px}.act .an{font-weight:800;font-size:15px}
+.act.primary{background:linear-gradient(135deg,var(--red),#e8324c);color:#fff;border:0;grid-column:1/-1;min-height:96px}
+.act.primary .ae{font-size:32px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+label.fl{display:block;font-weight:700;font-size:13px;margin:0 0 6px}
+input[type=text],input[type=tel],input[type=number],select,textarea{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:13px 12px;font-size:16px;background:#fbfcfe;color:var(--ink);margin-bottom:14px;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--red);background:#fff}
+textarea{min-height:60px;resize:vertical}.hint{font-size:12px;color:var(--muted);margin:-8px 0 14px}
+.row2{display:flex;gap:10px}.row2>div{flex:1}
+/* chips */
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px}
+.chips button{white-space:nowrap;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-weight:700;font-size:13px;color:var(--muted)}
+.chips button.on{background:var(--red);color:#fff;border-color:var(--red)}
+/* merchant list */
+.mrow{display:flex;align-items:center;gap:12px;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);margin-bottom:10px}
+.mrow.on{border-color:var(--red);background:#fff0f2}
+.mrow .mi{width:44px;height:44px;border-radius:10px;background:#eef1f6;display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto;overflow:hidden}
+.mrow .mi img{width:100%;height:100%;object-fit:cover}
+.mrow .mt{flex:1}.mrow .mt .nm{font-weight:800;font-size:15px}.mrow .mt .ds{font-size:12px;color:var(--muted)}
+.mrow .mst{font-size:10px;font-weight:800;padding:3px 8px;border-radius:999px}
+/* product ring */
+.addbtn{border:0;background:var(--red);color:#fff;font-weight:800;font-size:15px;padding:13px;border-radius:12px;width:100%}
+.qtybox{display:flex;align-items:center;gap:8px}
+.qtybox button{border:1.5px solid var(--line);background:#fff;width:38px;height:38px;border-radius:10px;font-size:18px;font-weight:800;color:var(--red)}
+.qtybox input{width:56px;text-align:center;margin:0}
+.cline{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.cline:last-child{border-bottom:0}.cline .cl-t{flex:1}.cline .cl-t .nm{font-weight:700}.cline .cl-t .ds{font-size:12px;color:var(--muted)}
+.cline .cl-a{font-weight:800;white-space:nowrap}.cline .cl-x{border:0;background:none;color:var(--red);font-size:20px;font-weight:800}
+.breakdown div{display:flex;justify-content:space-between;padding:4px 0;font-size:14px;color:var(--muted)}
+.breakdown div.tot{color:var(--ink);font-weight:800;font-size:17px;border-top:1px dashed var(--line);margin-top:6px;padding-top:8px}
+.totbar{display:flex;justify-content:space-between;align-items:center;background:#14161d;color:#fff;border-radius:14px;padding:14px 16px;margin:6px 0 14px}
+.totbar b{font-size:22px}.totbar span{opacity:.8;font-size:13px}
+/* payment */
+.pays{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pay{border:1.5px solid var(--line);border-radius:14px;padding:16px 10px;text-align:center;background:#fbfcfe;font-weight:800;font-size:14px}
+.pay .pe{font-size:28px;display:block;margin-bottom:6px}.pay.on{border-color:var(--red);background:#fff0f2}
+/* choice tiles (vehicle) */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.tiles button{border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:16px;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px}
+.tiles button.on{border-color:var(--red);background:#fff0f2;color:var(--red)}
+.dropz{display:block;width:100%;border:2px dashed var(--red);border-radius:14px;padding:16px;text-align:center;background:#fff5f6;color:var(--red);font-weight:700;margin-bottom:10px;font-size:13px}
+.filerow{display:flex;align-items:center;gap:10px;background:#fbfcfe;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:8px;font-size:13px}
+.filerow .fi{width:32px;height:32px;border-radius:8px;object-fit:cover;background:#eef1f6;display:flex;align-items:center;justify-content:center;font-size:16px;flex:0 0 auto}
+.filerow .fx{margin-left:auto;color:var(--red);border:0;background:none;font-size:18px;font-weight:800}
+.cta{width:100%;border:0;background:var(--red);color:#fff;font-weight:800;font-size:17px;padding:16px;border-radius:14px;box-shadow:var(--shadow-lg);margin-top:4px}
+.cta:active{transform:scale(.99)}.cta.blue{background:var(--blue)}.cta.ghost{background:#fff;color:var(--red);border:1.5px solid var(--line);box-shadow:var(--shadow)}.cta:disabled{opacity:.45}
+.row2 .cta{margin-top:0}
+/* orders */
+.filterbar{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px}
+.filterbar button{white-space:nowrap;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-weight:700;font-size:13px;color:var(--muted)}
+.filterbar button.on{background:var(--red);color:#fff;border-color:var(--red)}
+.order{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow);margin-bottom:12px}
+.order .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.order .who{font-weight:800;font-size:15px}.order .meta{font-size:12px;color:var(--muted)}
+.order .svc-t{font-size:13px;font-weight:700;color:var(--red);margin:6px 0}
+.badge{font-size:11px;font-weight:800;padding:5px 10px;border-radius:999px;white-space:nowrap}
+.order .amt2{font-weight:800;font-size:16px}
+.statusrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.statusrow button{border:1.5px solid var(--line);background:#fbfcfe;border-radius:10px;padding:7px 8px;font-size:11px;font-weight:700;color:var(--muted)}
+.statusrow button.on{border-color:var(--red);background:#fff0f2;color:var(--red)}
+.rtag{display:inline-block;font-size:10px;font-weight:800;background:#fff0f2;color:var(--red);border-radius:6px;padding:2px 7px;margin-left:6px;vertical-align:middle}
+.mini{font-size:12px;color:var(--red);font-weight:700;border:0;background:none;padding:4px 0;margin-top:6px}
+/* dashboard */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 14px;box-shadow:var(--shadow)}
+.stat .n{font-size:28px;font-weight:900;line-height:1}.stat .l{font-size:12px;color:var(--muted);font-weight:700;margin-top:6px}
+.stat.sales{grid-column:1/-1;background:linear-gradient(135deg,var(--red),#e8324c);color:#fff;border:0}.stat.sales .l{color:#fff;opacity:.9}
+.stat.rev{grid-column:1/-1;background:var(--blue);color:#fff;border:0}.stat.rev .l{color:#fff;opacity:.85}
+.empty{text-align:center;color:var(--muted);padding:40px 16px;font-weight:600}.empty .ee{font-size:44px;margin-bottom:10px}
+/* receipt */
+.receipt{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow);font-family:"Segoe UI",system-ui,sans-serif}
+.receipt .rh{text-align:center;border-bottom:2px dashed var(--line);padding-bottom:12px;margin-bottom:12px}
+.receipt .rh img{width:52px;height:52px;object-fit:contain;margin:0 auto 6px;border-radius:10px}
+.receipt .rh .bt{font-weight:900;font-size:18px;color:var(--red)}.receipt .rh .st{font-size:12px;color:var(--muted)}
+.receipt .rrow{display:flex;justify-content:space-between;font-size:13px;padding:3px 0}
+.receipt .ritem{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px dotted var(--line)}
+.receipt .rtot{display:flex;justify-content:space-between;font-weight:900;font-size:18px;border-top:2px dashed var(--line);margin-top:10px;padding-top:10px}
+.receipt .rf{text-align:center;font-size:11px;color:var(--muted);margin-top:14px}
+.confirm{text-align:center;padding:10px}
+.confirm .ok{width:76px;height:76px;border-radius:50%;background:var(--good);color:#fff;font-size:40px;display:flex;align-items:center;justify-content:center;margin:6px auto 14px}
+.settings-note{font-size:12px;color:var(--warn);background:#fff8ec;border:1px solid #ffe6b0;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-weight:600}
+.nav{position:fixed;bottom:0;left:0;right:0;max-width:720px;margin:0 auto;background:#fff;border-top:1px solid var(--line);display:flex;box-shadow:0 -4px 16px rgba(20,25,50,.06);z-index:30}
+.nav button{flex:1;border:0;background:none;padding:9px 0 10px;color:var(--muted);font-size:11px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px}
+.nav button .ni{font-size:22px;line-height:1}.nav button.on{color:var(--red)}
+.badge-dot{position:relative}
+.badge-dot[data-n]:not([data-n="0"]):after{content:attr(data-n);position:absolute;top:-3px;right:calc(50% - 22px);background:var(--blue);color:#fff;font-size:10px;font-weight:800;min-width:16px;height:16px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+@media print{.appbar,.nav,.back,.cta,.no-print{display:none!important}body{padding:0}}
+</style>
+</head>
+<body>
+
+<div class="appbar">
+  <img src="assets/myplopplop-logo.png" class="logo" alt="MyPlopPlop">
+  <h1>MyPlopPlop<small data-i18n="app_s">POINT OF SALE</small></h1>
+  <div class="lang"><button data-lang="ht" class="on">HT</button><button data-lang="fr">FR</button><button data-lang="en">EN</button></div>
+  <button class="gear" onclick="go('set')">⚙️</button>
+</div>
+
+<main>
+
+<!-- HOME -->
+<section id="s-home" class="screen on">
+  <div class="h2" data-i18n="home_t">Kès MyPlopPlop</div>
+  <p class="sub" data-i18n="home_s">Chwazi yon aksyon pou kòmanse.</p>
+  <div class="actions">
+    <button class="act primary" onclick="startOrder()"><span class="ae">🛍️</span><span class="an" data-i18n="a_order">Nouvo Kòmand</span></button>
+    <button class="act" onclick="go('merchant')"><span class="ae">🏪</span><span class="an" data-i18n="a_merch">Enskri Machann</span></button>
+    <button class="act" onclick="startLog('pickup')"><span class="ae">📦</span><span class="an" data-i18n="a_pickup">Demann Ranmasaj</span></button>
+    <button class="act" onclick="startLog('delivery')"><span class="ae">🚚</span><span class="an" data-i18n="a_deliv">Demann Livrezon</span></button>
+  </div>
+</section>
+
+<!-- NEW ORDER -->
+<section id="s-order" class="screen">
+  <button class="back" onclick="go('home')">‹ <span data-i18n="back">Retounen</span></button>
+  <div class="h2" data-i18n="order_t">Nouvo Kòmand</div>
+
+  <div class="card">
+    <label class="fl" data-i18n="sel_merch">Chwazi Machann</label>
+    <input type="text" id="mSearch" data-i18n-ph="search_m" placeholder="Chèche machann...">
+    <div class="chips" id="mCats"></div>
+    <div id="mList"></div>
+  </div>
+
+  <div class="card">
+    <label class="fl" data-i18n="add_prod">Ajoute Pwodwi</label>
+    <input type="text" id="pName" data-i18n-ph="prod_name" placeholder="Non pwodwi">
+    <div class="row2">
+      <div><label class="fl" data-i18n="price">Pri (GDES)</label><input type="number" id="pPrice" inputmode="numeric"></div>
+      <div><label class="fl" data-i18n="qty">Kantite</label>
+        <div class="qtybox"><button onclick="stepQty(-1)">−</button><input type="number" id="pQty" value="1" inputmode="numeric"><button onclick="stepQty(1)">+</button></div>
+      </div>
+    </div>
+    <button class="addbtn" onclick="addProduct()">+ <span data-i18n="add">Ajoute</span></button>
+  </div>
+
+  <div class="card" id="cartCard" style="display:none">
+    <div style="font-weight:800;margin-bottom:6px" data-i18n="cart_t">Kòmand la</div>
+    <div id="cartLines"></div>
+    <div class="breakdown" id="cartBreak" style="margin-top:8px"></div>
+  </div>
+
+  <button class="cta" id="orderNext" onclick="go('checkout')" disabled data-i18n="to_pay">Kontinye pou Peman</button>
+</section>
+
+<!-- CHECKOUT -->
+<section id="s-checkout" class="screen">
+  <button class="back" onclick="go('order')">‹ <span data-i18n="back">Retounen</span></button>
+  <div class="h2" data-i18n="checkout_t">Peman & Kliyan</div>
+  <div class="card">
+    <label class="fl" data-i18n="f_name">Non kliyan</label><input type="text" id="c_name">
+    <div class="row2">
+      <div><label class="fl" data-i18n="f_phone">Telefòn</label><input type="tel" id="c_phone" inputmode="tel" placeholder="+509 ..."></div>
+      <div><label class="fl" data-i18n="f_wa">WhatsApp</label><input type="tel" id="c_wa" inputmode="tel" placeholder="+509 ..."></div>
+    </div>
+    <label class="fl" data-i18n="deliv_addr">Adrès livrezon</label><input type="text" id="c_addr">
+  </div>
+  <div class="card"><div class="breakdown" id="coBreak"></div></div>
+  <div style="font-weight:800;margin:12px 0 8px" data-i18n="pay_t">Peman</div>
+  <div class="pays" id="payGrid">
+    <button class="pay" data-pay="cash"><span class="pe">💵</span><span data-i18n="p_cash">Kach</span></button>
+    <button class="pay" data-pay="moncash"><span class="pe">📱</span>MonCash</button>
+    <button class="pay" data-pay="natcash"><span class="pe">📲</span>NatCash</button>
+    <button class="pay" data-pay="card"><span class="pe">💳</span><span data-i18n="p_card">Kat</span></button>
+  </div>
+  <div style="height:12px"></div>
+  <button class="cta" id="payBtn" onclick="completeOrder()" disabled data-i18n="pay_do">Konplete & Resi</button>
+</section>
+
+<!-- RECEIPT -->
+<section id="s-receipt" class="screen">
+  <div class="confirm no-print"><div class="ok">✓</div></div>
+  <div class="receipt" id="receiptBox"></div>
+  <div style="height:14px"></div>
+  <div class="row2 no-print">
+    <button class="cta ghost" onclick="window.print()" data-i18n="print">Enprime</button>
+    <button class="cta" onclick="go('home')" data-i18n="new_order">Nouvo kòmand</button>
+  </div>
+</section>
+
+<!-- REGISTER MERCHANT -->
+<section id="s-merchant" class="screen">
+  <button class="back" onclick="go('home')">‹ <span data-i18n="back">Retounen</span></button>
+  <div class="h2" data-i18n="merch_t">Enskri Machann</div>
+  <div class="card">
+    <label class="fl" data-i18n="biz_name">Non Biznis la</label><input type="text" id="b_name">
+    <label class="fl" data-i18n="owner">Non Pwopriyetè</label><input type="text" id="b_owner">
+    <div class="row2">
+      <div><label class="fl" data-i18n="f_phone">Telefòn</label><input type="tel" id="b_phone" inputmode="tel"></div>
+      <div><label class="fl" data-i18n="f_wa">WhatsApp</label><input type="tel" id="b_wa" inputmode="tel"></div>
+    </div>
+    <label class="fl" data-i18n="category">Kategori</label>
+    <select id="b_cat"></select>
+    <label class="fl" data-i18n="address">Adrès</label><input type="text" id="b_addr">
+  </div>
+  <label class="dropz" for="mDocInput">📎 <span data-i18n="m_docs">Logo, Patente, ID (opsyonèl)</span></label>
+  <input type="file" id="mDocInput" accept="image/*,application/pdf" multiple style="display:none">
+  <div id="mDocList"></div>
+  <button class="cta" onclick="saveMerchant()" data-i18n="m_save">Anrejistre Machann</button>
+</section>
+
+<!-- PICKUP / DELIVERY -->
+<section id="s-log" class="screen">
+  <button class="back" onclick="go('home')">‹ <span data-i18n="back">Retounen</span></button>
+  <div class="h2" id="logTitle"></div>
+  <div class="card">
+    <label class="fl" data-i18n="pickup_addr">Adrès Ranmasaj</label><input type="text" id="l_pick">
+    <label class="fl" data-i18n="deliv_addr2">Adrès Livrezon</label><input type="text" id="l_drop">
+    <div class="row2">
+      <div><label class="fl" data-i18n="cust_phone">Tel Kliyan</label><input type="tel" id="l_cphone" inputmode="tel"></div>
+      <div><label class="fl" data-i18n="recip_phone">Tel Resevè</label><input type="tel" id="l_rphone" inputmode="tel"></div>
+    </div>
+    <label class="fl" data-i18n="pkg_desc">Deskripsyon Pakè</label><textarea id="l_desc"></textarea>
+    <label class="fl" data-i18n="vehicle">Machin</label>
+    <div class="tiles" id="vehTiles">
+      <button data-veh="moto">🏍️ <span data-i18n="moto">Moto</span></button>
+      <button data-veh="car">🚗 <span data-i18n="car">Machin</span></button>
+    </div>
+    <label class="fl" data-i18n="deliv_fee">Frè livrezon (GDES)</label><input type="number" id="l_fee" inputmode="numeric">
+  </div>
+  <button class="cta" onclick="saveLog()" data-i18n="l_save">Kreye Demann</button>
+</section>
+
+<!-- ORDERS -->
+<section id="s-orders" class="screen">
+  <div class="h2" data-i18n="ord_t">Kòmand & Livrezon</div>
+  <p class="sub" data-i18n="ord_s">Peze yon estati pou chanje l.</p>
+  <div class="filterbar" id="filterBar"></div>
+  <div id="ordersList"></div>
+</section>
+
+<!-- PAYMENTS -->
+<section id="s-pay" class="screen">
+  <div class="h2" data-i18n="pmt_t">Peman</div>
+  <p class="sub" id="pmtDate"></p>
+  <div id="pmtBody"></div>
+</section>
+
+<!-- DASHBOARD -->
+<section id="s-dash" class="screen">
+  <div class="h2" data-i18n="dash_t">Tablodbò</div>
+  <p class="sub" id="dashDate"></p>
+  <div class="stats" id="dashStats"></div>
+</section>
+
+<!-- SETTINGS -->
+<section id="s-set" class="screen">
+  <button class="back" onclick="go('home')">‹ <span data-i18n="back">Retounen</span></button>
+  <div class="h2" data-i18n="set_t">Paramèt</div>
+  <p class="sub" data-i18n="set_s">Chanjman yo sere sou aparèy sa a.</p>
+  <div class="card" id="setBody"></div>
+  <button class="cta" onclick="saveSettings()" data-i18n="set_save">Sere paramèt</button>
+</section>
+
+</main>
+
+<nav class="nav">
+  <button data-nav="home" class="on" onclick="go('home')"><span class="ni">🏠</span><span data-i18n="n_home">Akèy</span></button>
+  <button data-nav="orders" class="badge-dot" onclick="go('orders')"><span class="ni">📋</span><span data-i18n="n_orders">Kòmand</span></button>
+  <button data-nav="pay" onclick="go('pay')"><span class="ni">💳</span><span data-i18n="n_pay">Peman</span></button>
+  <button data-nav="dash" onclick="go('dash')"><span class="ni">📊</span><span data-i18n="n_dash">Tablodbò</span></button>
+</nav>
+
+<script>
+/* ============================================================
+   MyPlopPlop — POS MVP (cashier system)
+   Single file, offline, localStorage. HT / FR / EN.
+   ============================================================ */
+const T={
+ ht:{app_s:'POINT OF SALE',home_t:'Kès MyPlopPlop',home_s:'Chwazi yon aksyon pou kòmanse.',
+  a_order:'Nouvo Kòmand',a_merch:'Enskri Machann',a_pickup:'Demann Ranmasaj',a_deliv:'Demann Livrezon',
+  back:'Retounen',order_t:'Nouvo Kòmand',sel_merch:'Chwazi Machann',search_m:'Chèche machann...',
+  add_prod:'Ajoute Pwodwi',prod_name:'Non pwodwi',price:'Pri (GDES)',qty:'Kantite',add:'Ajoute',
+  cart_t:'Kòmand la',prod_total:'Total Pwodwi',deliv_fee:'Frè Livrezon',svc_fee:'Frè Sèvis',grand:'GRAN TOTAL',
+  to_pay:'Kontinye pou Peman',checkout_t:'Peman & Kliyan',f_name:'Non kliyan',f_phone:'Telefòn',f_wa:'WhatsApp',
+  deliv_addr:'Adrès livrezon',pay_t:'Peman',p_cash:'Kach',p_card:'Kat',pay_do:'Konplete & Resi',
+  print:'Enprime',new_order:'Nouvo kòmand',receipt:'RESI',order_no:'Kòmand Nº',merchant:'Machann',date:'Dat',
+  cashier:'Kès HaitiBiznis',thanks:'Mèsi pou biznis ou! — MyPlopPlop.com',
+  merch_t:'Enskri Machann',biz_name:'Non Biznis la',owner:'Non Pwopriyetè',category:'Kategori',address:'Adrès',
+  m_docs:'Logo, Patente, ID (opsyonèl)',m_save:'Anrejistre Machann',
+  pickup_t:'Demann Ranmasaj',deliv_t:'Demann Livrezon',pickup_addr:'Adrès Ranmasaj',deliv_addr2:'Adrès Livrezon',
+  cust_phone:'Tel Kliyan',recip_phone:'Tel Resevè',pkg_desc:'Deskripsyon Pakè',vehicle:'Machin',moto:'Moto',car:'Machin',l_save:'Kreye Demann',
+  ord_t:'Kòmand & Livrezon',ord_s:'Peze yon estati pou chanje l.',pmt_t:'Peman',dash_t:'Tablodbò',
+  set_t:'Paramèt',set_s:'Chanjman yo sere sou aparèy sa a.',set_save:'Sere paramèt',
+  n_home:'Akèy',n_orders:'Kòmand',n_pay:'Peman',n_dash:'Tablodbò',
+  all:'Tout',deliveries:'Livrezon',empty:'Pa gen anyen pou kounye a.',assign_driver:'Bay yon chofè',driver:'Chofè',
+  st_pending:'An atant',st_paid:'Peye',st_prep:'Ap prepare',st_out:'An wout',st_delivered:'Livre',st_cancel:'Anile',
+  ls_wait:'Ap tann chofè',ls_assigned:'Chofè bay',ls_pick:'Ranmase',ls_deliv:'Livre',
+  d_orders:'Kòmand jodi a',d_active:'Livrezon aktif',d_merch:'Machann enskri',d_sales:'Vant jodi a',d_rev:'Revni livrezon',
+  no_merch:'Pa gen machann — antre kòmand san machann oswa enskri youn.',walkin:'San machann (walk-in)',
+  cat_super:'Makèt',cat_resto:'Restoran',cat_pharm:'Famasi',cat_hard:'Kenklayri',cat_bout:'Boutik',
+  set_deliv:'Frè livrezon default (GDES)',set_svc:'Frè sèvis (%)',
+  need_prod:'Ajoute omwen yon pwodwi.',need_name:'Antre non kliyan an.',need_pay:'Chwazi metòd peman.',
+  st_active:'Aktif',st_approved:'Apwouve',mst_pending:'An atant'},
+ fr:{app_s:'POINT DE VENTE',home_t:'Caisse MyPlopPlop',home_s:'Choisissez une action pour commencer.',
+  a_order:'Nouvelle Commande',a_merch:'Enregistrer Marchand',a_pickup:'Demande de Ramassage',a_deliv:'Demande de Livraison',
+  back:'Retour',order_t:'Nouvelle Commande',sel_merch:'Choisir un Marchand',search_m:'Rechercher...',
+  add_prod:'Ajouter Produit',prod_name:'Nom du produit',price:'Prix (GDES)',qty:'Quantité',add:'Ajouter',
+  cart_t:'La commande',prod_total:'Total Produits',deliv_fee:'Frais de Livraison',svc_fee:'Frais de Service',grand:'TOTAL',
+  to_pay:'Continuer vers Paiement',checkout_t:'Paiement & Client',f_name:'Nom du client',f_phone:'Téléphone',f_wa:'WhatsApp',
+  deliv_addr:'Adresse de livraison',pay_t:'Paiement',p_cash:'Espèces',p_card:'Carte',pay_do:'Terminer & Reçu',
+  print:'Imprimer',new_order:'Nouvelle commande',receipt:'REÇU',order_no:'Commande Nº',merchant:'Marchand',date:'Date',
+  cashier:'Caisse HaitiBiznis',thanks:'Merci de votre confiance ! — MyPlopPlop.com',
+  merch_t:'Enregistrer Marchand',biz_name:'Nom de l’entreprise',owner:'Nom du propriétaire',category:'Catégorie',address:'Adresse',
+  m_docs:'Logo, Patente, ID (optionnel)',m_save:'Enregistrer',
+  pickup_t:'Demande de Ramassage',deliv_t:'Demande de Livraison',pickup_addr:'Adresse Ramassage',deliv_addr2:'Adresse Livraison',
+  cust_phone:'Tél Client',recip_phone:'Tél Destinataire',pkg_desc:'Description du Colis',vehicle:'Véhicule',moto:'Moto',car:'Voiture',l_save:'Créer la Demande',
+  ord_t:'Commandes & Livraisons',ord_s:'Appuyez sur un statut pour le changer.',pmt_t:'Paiements',dash_t:'Tableau de bord',
+  set_t:'Réglages',set_s:'Enregistré sur cet appareil.',set_save:'Enregistrer',
+  n_home:'Accueil',n_orders:'Commandes',n_pay:'Paiements',n_dash:'Tableau',
+  all:'Tout',deliveries:'Livraisons',empty:'Rien pour l’instant.',assign_driver:'Assigner un chauffeur',driver:'Chauffeur',
+  st_pending:'En attente',st_paid:'Payé',st_prep:'En préparation',st_out:'En route',st_delivered:'Livré',st_cancel:'Annulé',
+  ls_wait:'Attente chauffeur',ls_assigned:'Chauffeur assigné',ls_pick:'Ramassé',ls_deliv:'Livré',
+  d_orders:'Commandes du jour',d_active:'Livraisons actives',d_merch:'Marchands inscrits',d_sales:'Ventes du jour',d_rev:'Revenu livraison',
+  no_merch:'Aucun marchand — commande sans marchand ou inscrivez-en un.',walkin:'Sans marchand',
+  cat_super:'Supermarché',cat_resto:'Restaurant',cat_pharm:'Pharmacie',cat_hard:'Quincaillerie',cat_bout:'Boutique',
+  set_deliv:'Frais de livraison par défaut (GDES)',set_svc:'Frais de service (%)',
+  need_prod:'Ajoutez au moins un produit.',need_name:'Saisissez le nom du client.',need_pay:'Choisissez le paiement.',
+  st_active:'Actif',st_approved:'Approuvé',mst_pending:'En attente'},
+ en:{app_s:'POINT OF SALE',home_t:'MyPlopPlop Cashier',home_s:'Choose an action to start.',
+  a_order:'New Order',a_merch:'Register Merchant',a_pickup:'Pickup Request',a_deliv:'Delivery Request',
+  back:'Back',order_t:'New Order',sel_merch:'Select Merchant',search_m:'Search merchant...',
+  add_prod:'Add Product',prod_name:'Product name',price:'Price (GDES)',qty:'Qty',add:'Add',
+  cart_t:'The order',prod_total:'Product Total',deliv_fee:'Delivery Fee',svc_fee:'Service Fee',grand:'GRAND TOTAL',
+  to_pay:'Continue to Payment',checkout_t:'Payment & Customer',f_name:'Customer name',f_phone:'Phone',f_wa:'WhatsApp',
+  deliv_addr:'Delivery address',pay_t:'Payment',p_cash:'Cash',p_card:'Card',pay_do:'Complete & Receipt',
+  print:'Print',new_order:'New order',receipt:'RECEIPT',order_no:'Order Nº',merchant:'Merchant',date:'Date',
+  cashier:'HaitiBiznis Cashier',thanks:'Thank you for your business! — MyPlopPlop.com',
+  merch_t:'Register Merchant',biz_name:'Business Name',owner:'Owner Name',category:'Category',address:'Address',
+  m_docs:'Logo, Patente, ID (optional)',m_save:'Register Merchant',
+  pickup_t:'Pickup Request',deliv_t:'Delivery Request',pickup_addr:'Pickup Address',deliv_addr2:'Delivery Address',
+  cust_phone:'Customer Phone',recip_phone:'Recipient Phone',pkg_desc:'Package Description',vehicle:'Vehicle',moto:'Moto',car:'Car',l_save:'Create Request',
+  ord_t:'Orders & Deliveries',ord_s:'Tap a status to change it.',pmt_t:'Payments',dash_t:'Dashboard',
+  set_t:'Settings',set_s:'Saved on this device.',set_save:'Save settings',
+  n_home:'Home',n_orders:'Orders',n_pay:'Payments',n_dash:'Dashboard',
+  all:'All',deliveries:'Deliveries',empty:'Nothing yet.',assign_driver:'Assign a driver',driver:'Driver',
+  st_pending:'Pending',st_paid:'Paid',st_prep:'Preparing',st_out:'Out for Delivery',st_delivered:'Delivered',st_cancel:'Cancelled',
+  ls_wait:'Waiting for Driver',ls_assigned:'Driver Assigned',ls_pick:'Picked Up',ls_deliv:'Delivered',
+  d_orders:'Today’s Orders',d_active:'Active Deliveries',d_merch:'Registered Merchants',d_sales:'Today’s Sales',d_rev:'Delivery Revenue',
+  no_merch:'No merchants — take an order without one or register a merchant.',walkin:'No merchant (walk-in)',
+  cat_super:'Supermarket',cat_resto:'Restaurant',cat_pharm:'Pharmacy',cat_hard:'Hardware Store',cat_bout:'Boutique',
+  set_deliv:'Default delivery fee (GDES)',set_svc:'Service fee (%)',
+  need_prod:'Add at least one product.',need_name:'Enter the customer name.',need_pay:'Choose a payment method.',
+  st_active:'Active',st_approved:'Approved',mst_pending:'Pending'}
+};
+let lang=localStorage.getItem('mpp_lang')||'ht';
+function t(k){return (T[lang]&&T[lang][k])||T.ht[k]||k;}
+function applyI18n(){
+  document.documentElement.lang=lang;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(T[lang][k]!==undefined)el.textContent=T[lang][k];});
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{const k=el.getAttribute('data-i18n-ph');if(T[lang][k]!==undefined)el.placeholder=T[lang][k];});
+  const small=document.querySelector('.appbar h1 small');if(small)small.textContent=t('app_s');
+}
+
+const CATEGORIES=[{id:'super',k:'cat_super'},{id:'resto',k:'cat_resto'},{id:'pharm',k:'cat_pharm'},{id:'hard',k:'cat_hard'},{id:'bout',k:'cat_bout'}];
+function catName(id){const c=CATEGORIES.find(x=>x.id===id);return c?t(c.k):id;}
+
+/* stores */
+function load(k,d){try{return JSON.parse(localStorage.getItem(k))||d;}catch(e){return d;}}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v));}
+function seedMerchants(){
+  if(localStorage.getItem('mpp_merch'))return;
+  save('mpp_merch',[
+    {id:'M-1001',biz:'Makèt Belvil',owner:'Rose Pierre',phone:'+50937000001',wa:'',cat:'super',addr:'Delmas 31',status:'active',docs:[]},
+    {id:'M-1002',biz:'Resto Kreyòl',owner:'Marc Louis',phone:'+50937000002',wa:'',cat:'resto',addr:'Pétion-Ville',status:'active',docs:[]},
+    {id:'M-1003',biz:'Famasi Sante Plus',owner:'Nadège Jean',phone:'+50937000003',wa:'',cat:'pharm',addr:'Delmas 60',status:'active',docs:[]}
+  ]);
+}
+const DEFAULT_SET={deliveryFee:100,svcPct:0};
+function getSet(){return load('mpp_set',JSON.parse(JSON.stringify(DEFAULT_SET)));}
+function setSet(s){save('mpp_set',s);}
+
+/* status sets */
+const ORDER_STATUS=[{id:'pending',k:'st_pending',em:'🟡',c:'#fff6e6',t:'#b57000'},{id:'paid',k:'st_paid',em:'💳',c:'#e7f0ff',t:'#1550c0'},{id:'prep',k:'st_prep',em:'👩‍🍳',c:'#fff0e6',t:'#c05a00'},{id:'out',k:'st_out',em:'🛵',c:'#eef0ff',t:'#3730c0'},{id:'delivered',k:'st_delivered',em:'✅',c:'#e6f7ee',t:'#0c8f45'},{id:'cancel',k:'st_cancel',em:'✖️',c:'#fdeaea',t:'#c02626'}];
+const LOG_STATUS=[{id:'wait',k:'ls_wait',em:'🟡',c:'#fff6e6',t:'#b57000'},{id:'assigned',k:'ls_assigned',em:'🔵',c:'#e7f0ff',t:'#1550c0'},{id:'pick',k:'ls_pick',em:'📦',c:'#eef0ff',t:'#3730c0'},{id:'deliv',k:'ls_deliv',em:'✅',c:'#e6f7ee',t:'#0c8f45'}];
+function sInfo(set,id){return set.find(s=>s.id===id)||set[0];}
+
+/* ---------- Navigation ---------- */
+function go(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById('s-'+name).classList.add('on');
+  const nm={home:'home',orders:'orders',pay:'pay',dash:'dash'};
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.nav===nm[name]));
+  if(!nm[name])document.querySelector('.nav button[data-nav="home"]').classList.add('on');
+  window.scrollTo(0,0);
+  if(name==='order')renderOrderScreen();
+  if(name==='checkout')renderCheckout();
+  if(name==='merchant')renderMerchantForm();
+  if(name==='orders')renderOrders();
+  if(name==='pay')renderPayments();
+  if(name==='dash')renderDash();
+  if(name==='set')renderSettings();
+  refreshBadges();
+}
+function refreshBadges(){
+  const o=load('mpp_orders',[]),l=load('mpp_logs',[]);
+  const active=o.filter(x=>!['delivered','cancel'].includes(x.status)).length + l.filter(x=>x.status!=='deliv').length;
+  document.querySelector('.nav button[data-nav="orders"]').setAttribute('data-n',active);
+}
+
+/* ---------- New Order (cashier) ---------- */
+let cart=[], selMerchant=null, mCat='all';
+function startOrder(){cart=[];selMerchant=null;mCat='all';go('order');}
+function renderOrderScreen(){
+  // categories
+  const mc=document.getElementById('mCats'); mc.innerHTML='';
+  const opts=[{id:'all',lbl:t('all')}].concat(CATEGORIES.map(c=>({id:c.id,lbl:t(c.k)})));
+  opts.forEach(o=>{const b=document.createElement('button');b.textContent=o.lbl;b.className=mCat===o.id?'on':'';b.onclick=()=>{mCat=o.id;renderMerchantList();};mc.appendChild(b);});
+  renderMerchantList(); renderCart();
+}
+function renderMerchantList(){
+  const list=document.getElementById('mList'); list.innerHTML='';
+  const q=(document.getElementById('mSearch').value||'').toLowerCase();
+  let ms=load('mpp_merch',[]);
+  if(mCat!=='all')ms=ms.filter(m=>m.cat===mCat);
+  if(q)ms=ms.filter(m=>m.biz.toLowerCase().includes(q));
+  // walk-in option
+  const wi=document.createElement('div');wi.className='mrow'+(selMerchant==='walkin'?' on':'');
+  wi.innerHTML=`<div class="mi">🚶</div><div class="mt"><div class="nm">${t('walkin')}</div></div>`;
+  wi.onclick=()=>{selMerchant='walkin';renderMerchantList();};list.appendChild(wi);
+  ms.forEach(m=>{const el=document.createElement('div');el.className='mrow'+(selMerchant&&selMerchant.id===m.id?' on':'');
+    el.innerHTML=`<div class="mi">${({super:'🏪',resto:'🍽️',pharm:'💊',hard:'🔧',bout:'👗'})[m.cat]||'🏬'}</div>
+      <div class="mt"><div class="nm">${m.biz}</div><div class="ds">${catName(m.cat)} · ${m.addr||''}</div></div>`;
+    el.onclick=()=>{selMerchant=m;renderMerchantList();};list.appendChild(el);});
+}
+document.getElementById('mSearch').addEventListener('input',renderMerchantList);
+function stepQty(d){const el=document.getElementById('pQty');el.value=Math.max(1,(+el.value||1)+d);}
+function addProduct(){
+  const name=document.getElementById('pName').value.trim();
+  const price=+document.getElementById('pPrice').value||0;
+  const qty=Math.max(1,+document.getElementById('pQty').value||1);
+  if(!name)return;
+  cart.push({name,price,qty});
+  document.getElementById('pName').value='';document.getElementById('pPrice').value='';document.getElementById('pQty').value='1';
+  document.getElementById('pName').focus(); renderCart();
+}
+function totals(){
+  const s=getSet();
+  const prod=cart.reduce((a,b)=>a+b.price*b.qty,0);
+  const deliv=cart.length?(+s.deliveryFee||0):0;
+  const svc=Math.round(prod*(+s.svcPct||0)/100);
+  return {prod,deliv,svc,grand:prod+deliv+svc};
+}
+function renderCart(){
+  const card=document.getElementById('cartCard'); const lines=document.getElementById('cartLines');
+  card.style.display=cart.length?'block':'none';
+  lines.innerHTML='';
+  cart.forEach((it,i)=>{const r=document.createElement('div');r.className='cline';
+    r.innerHTML=`<span class="cl-t"><span class="nm">${it.name}</span><span class="ds">${it.qty} × ${it.price.toLocaleString()}</span></span>
+      <span class="cl-a">${(it.price*it.qty).toLocaleString()}</span><button class="cl-x">×</button>`;
+    r.querySelector('.cl-x').onclick=()=>{cart.splice(i,1);renderCart();};lines.appendChild(r);});
+  const tt=totals(); const b=document.getElementById('cartBreak');
+  b.innerHTML=`<div><span>${t('prod_total')}</span><span>${tt.prod.toLocaleString()} GDES</span></div>
+    <div><span>${t('deliv_fee')}</span><span>${tt.deliv.toLocaleString()} GDES</span></div>
+    ${tt.svc?`<div><span>${t('svc_fee')}</span><span>${tt.svc.toLocaleString()} GDES</span></div>`:''}
+    <div class="tot"><span>${t('grand')}</span><span>${tt.grand.toLocaleString()} GDES</span></div>`;
+  document.getElementById('orderNext').disabled=!cart.length;
+}
+
+/* ---------- Checkout ---------- */
+let coPay=null;
+function renderCheckout(){
+  const tt=totals();
+  document.getElementById('coBreak').innerHTML=`
+    <div><span>${t('prod_total')}</span><span>${tt.prod.toLocaleString()} GDES</span></div>
+    <div><span>${t('deliv_fee')}</span><span>${tt.deliv.toLocaleString()} GDES</span></div>
+    ${tt.svc?`<div><span>${t('svc_fee')}</span><span>${tt.svc.toLocaleString()} GDES</span></div>`:''}
+    <div class="tot"><span>${t('grand')}</span><span>${tt.grand.toLocaleString()} GDES</span></div>`;
+  document.querySelectorAll('#payGrid .pay').forEach(p=>{p.classList.toggle('on',coPay===p.dataset.pay);
+    p.onclick=()=>{coPay=p.dataset.pay;renderCheckout();};});
+  document.getElementById('payBtn').disabled=!coPay;
+}
+function payLabel(p){return ({cash:t('p_cash'),moncash:'MonCash',natcash:'NatCash',card:t('p_card')})[p]||p;}
+function completeOrder(){
+  const name=document.getElementById('c_name').value.trim();
+  if(!name){alert(t('need_name'));return;}
+  if(!coPay){alert(t('need_pay'));return;}
+  if(!cart.length){alert(t('need_prod'));return;}
+  const tt=totals(); const orders=load('mpp_orders',[]);
+  const id='MP-'+String(1000+orders.length+1);
+  const merchName=selMerchant==='walkin'?t('walkin'):(selMerchant?selMerchant.biz:t('walkin'));
+  const rec={id,type:'order',name,phone:document.getElementById('c_phone').value.trim(),wa:document.getElementById('c_wa').value.trim(),
+    addr:document.getElementById('c_addr').value.trim(),merchant:merchName,
+    items:cart.slice(),prodTotal:tt.prod,deliveryFee:tt.deliv,svcFee:tt.svc,total:tt.grand,
+    payment:coPay,status:'paid',driver:'',ts:nowStamp()};
+  orders.push(rec); save('mpp_orders',orders);
+  renderReceipt(rec);
+  cart=[];coPay=null;selMerchant=null;
+  document.getElementById('c_name').value='';document.getElementById('c_phone').value='';document.getElementById('c_wa').value='';document.getElementById('c_addr').value='';
+  document.querySelectorAll('#payGrid .pay').forEach(p=>p.classList.remove('on'));
+  refreshBadges();
+}
+function renderReceipt(o){
+  const items=o.items.map(it=>`<div class="ritem"><span>${it.qty}× ${it.name}</span><span>${(it.price*it.qty).toLocaleString()}</span></div>`).join('');
+  document.getElementById('receiptBox').innerHTML=`
+    <div class="rh"><img src="assets/myplopplop-logo.png" alt=""><div class="bt">MyPlopPlop</div><div class="st">${t('cashier')}</div></div>
+    <div class="rrow"><span>${t('order_no')}</span><b>${o.id}</b></div>
+    <div class="rrow"><span>${t('date')}</span><span>${fmtDate(o.ts)}</span></div>
+    <div class="rrow"><span>${t('f_name')}</span><span>${o.name}</span></div>
+    <div class="rrow"><span>${t('merchant')}</span><span>${o.merchant}</span></div>
+    <div style="height:8px"></div>${items}
+    <div class="rrow" style="margin-top:8px"><span>${t('prod_total')}</span><span>${o.prodTotal.toLocaleString()}</span></div>
+    <div class="rrow"><span>${t('deliv_fee')}</span><span>${o.deliveryFee.toLocaleString()}</span></div>
+    ${o.svcFee?`<div class="rrow"><span>${t('svc_fee')}</span><span>${o.svcFee.toLocaleString()}</span></div>`:''}
+    <div class="rtot"><span>${t('grand')}</span><span>${o.total.toLocaleString()} GDES</span></div>
+    <div class="rrow" style="margin-top:6px"><span>${t('pay_t')}</span><span>${payLabel(o.payment)}</span></div>
+    <div class="rf">${t('thanks')}</div>`;
+  go('receipt');
+}
+
+/* ---------- Register Merchant ---------- */
+let mDocs=[];
+function renderMerchantForm(){
+  const sel=document.getElementById('b_cat'); sel.innerHTML='';
+  CATEGORIES.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=t(c.k);sel.appendChild(o);});
+  mDocs=[]; renderMDocs();
+}
+document.getElementById('mDocInput').addEventListener('change',e=>{[...e.target.files].forEach(f=>mDocs.push({name:f.name,url:f.type.startsWith('image/')?URL.createObjectURL(f):null}));e.target.value='';renderMDocs();});
+function renderMDocs(){const l=document.getElementById('mDocList');l.innerHTML='';mDocs.forEach((d,i)=>{const r=document.createElement('div');r.className='filerow';
+  r.innerHTML=`${d.url?`<img class="fi" src="${d.url}">`:'<span class="fi">📄</span>'}<span>${d.name}</span><button class="fx">×</button>`;
+  r.querySelector('.fx').onclick=()=>{mDocs.splice(i,1);renderMDocs();};l.appendChild(r);});}
+function saveMerchant(){
+  const biz=document.getElementById('b_name').value.trim();
+  if(!biz){alert(t('need_name'));return;}
+  const ms=load('mpp_merch',[]); const id='M-'+String(1000+ms.length+1);
+  ms.push({id,biz,owner:document.getElementById('b_owner').value.trim(),phone:document.getElementById('b_phone').value.trim(),
+    wa:document.getElementById('b_wa').value.trim(),cat:document.getElementById('b_cat').value,addr:document.getElementById('b_addr').value.trim(),
+    status:'pending',docs:mDocs.map(d=>({name:d.name})),ts:nowStamp()});
+  save('mpp_merch',ms);
+  ['b_name','b_owner','b_phone','b_wa','b_addr'].forEach(i=>document.getElementById(i).value='');
+  alert(biz+' ✓'); go('home');
+}
+
+/* ---------- Pickup / Delivery ---------- */
+let logType='delivery', logVeh='';
+function startLog(type){logType=type;logVeh='';
+  document.getElementById('logTitle').textContent=type==='pickup'?t('pickup_t'):t('deliv_t');
+  ['l_pick','l_drop','l_cphone','l_rphone','l_desc'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('l_fee').value=getSet().deliveryFee;
+  document.querySelectorAll('#vehTiles button').forEach(b=>b.classList.remove('on'));
+  go('log');}
+document.querySelectorAll('#vehTiles button').forEach(b=>b.onclick=()=>{logVeh=b.dataset.veh;document.querySelectorAll('#vehTiles button').forEach(x=>x.classList.toggle('on',x===b));});
+function saveLog(){
+  const logs=load('mpp_logs',[]); const id=(logType==='pickup'?'PU-':'DL-')+String(1000+logs.length+1);
+  logs.push({id,type:logType,pick:document.getElementById('l_pick').value.trim(),drop:document.getElementById('l_drop').value.trim(),
+    cphone:document.getElementById('l_cphone').value.trim(),rphone:document.getElementById('l_rphone').value.trim(),
+    desc:document.getElementById('l_desc').value.trim(),veh:logVeh,fee:+document.getElementById('l_fee').value||0,
+    status:'wait',driver:'',ts:nowStamp()});
+  save('mpp_logs',logs); alert(id+' ✓'); go('orders');
+}
+
+/* ---------- Orders & Deliveries board ---------- */
+let filter='all';
+function renderOrders(){
+  const fb=document.getElementById('filterBar');fb.innerHTML='';
+  const opts=[{id:'all',lbl:t('all')}].concat(ORDER_STATUS.map(s=>({id:s.id,lbl:t(s.k)}))).concat([{id:'deliveries',lbl:t('deliveries')}]);
+  opts.forEach(o=>{const b=document.createElement('button');b.textContent=o.lbl;b.className=filter===o.id?'on':'';b.onclick=()=>{filter=o.id;renderOrders();};fb.appendChild(b);});
+  const list=document.getElementById('ordersList');list.innerHTML='';
+  const orders=load('mpp_orders',[]).map(o=>({...o,_kind:'order'}));
+  const logs=load('mpp_logs',[]).map(l=>({...l,_kind:'log'}));
+  let all=orders.concat(logs).sort((a,b)=>b.ts.localeCompare(a.ts));
+  if(filter==='deliveries')all=all.filter(x=>x._kind==='log');
+  else if(filter!=='all')all=all.filter(x=>x._kind==='order'&&x.status===filter);
+  if(!all.length){list.innerHTML=`<div class="empty"><div class="ee">📋</div>${t('empty')}</div>`;return;}
+  all.forEach(o=>{
+    if(o._kind==='order'){const st=sInfo(ORDER_STATUS,o.status);
+      const el=document.createElement('div');el.className='order';
+      el.innerHTML=`<div class="top"><div><div class="who">${o.name}</div><div class="meta">${o.id} · ${o.merchant} · ${fmtDate(o.ts)}</div></div>
+        <span class="badge" style="background:${st.c};color:${st.t}">${st.em} ${t(st.k)}</span></div>
+        <div class="svc-t">${o.items.length} ${t('add_prod').toLowerCase()} · ${o.driver?('🛵 '+o.driver):''}</div>
+        <div class="top"><div class="meta">${payLabel(o.payment)}</div><div class="amt2">${o.total.toLocaleString()} GDES</div></div>
+        <button class="mini">＋ ${t('assign_driver')}</button>
+        <div class="statusrow"></div>`;
+      el.querySelector('.mini').onclick=()=>{const d=prompt(t('assign_driver'),o.driver||'');if(d!==null){const os=load('mpp_orders',[]);const r=os.find(x=>x.id===o.id);r.driver=d.trim();if(r.status==='paid'&&d.trim())r.status='out';save('mpp_orders',os);renderOrders();}};
+      const sr=el.querySelector('.statusrow');ORDER_STATUS.forEach(s=>{const b=document.createElement('button');b.className=o.status===s.id?'on':'';b.innerHTML=`${s.em} ${t(s.k)}`;b.onclick=()=>{const os=load('mpp_orders',[]);os.find(x=>x.id===o.id).status=s.id;save('mpp_orders',os);renderOrders();refreshBadges();};sr.appendChild(b);});
+      list.appendChild(el);
+    } else {const st=sInfo(LOG_STATUS,o.status);
+      const el=document.createElement('div');el.className='order';
+      el.innerHTML=`<div class="top"><div><div class="who">${o.type==='pickup'?t('pickup_t'):t('deliv_t')}<span class="rtag">${o.veh?t(o.veh):''}</span></div>
+        <div class="meta">${o.id} · ${fmtDate(o.ts)}</div></div>
+        <span class="badge" style="background:${st.c};color:${st.t}">${st.em} ${t(st.k)}</span></div>
+        <div class="svc-t">${o.pick||'—'} → ${o.drop||'—'}</div>
+        <div class="top"><div class="meta">${o.desc||''}</div><div class="amt2">${o.fee?o.fee.toLocaleString()+' GDES':''}</div></div>
+        <button class="mini">＋ ${t('assign_driver')}${o.driver?': '+o.driver:''}</button>
+        <div class="statusrow"></div>`;
+      el.querySelector('.mini').onclick=()=>{const d=prompt(t('assign_driver'),o.driver||'');if(d!==null){const ls=load('mpp_logs',[]);const r=ls.find(x=>x.id===o.id);r.driver=d.trim();if(r.status==='wait'&&d.trim())r.status='assigned';save('mpp_logs',ls);renderOrders();}};
+      const sr=el.querySelector('.statusrow');LOG_STATUS.forEach(s=>{const b=document.createElement('button');b.className=o.status===s.id?'on':'';b.innerHTML=`${s.em} ${t(s.k)}`;b.onclick=()=>{const ls=load('mpp_logs',[]);ls.find(x=>x.id===o.id).status=s.id;save('mpp_logs',ls);renderOrders();refreshBadges();};sr.appendChild(b);});
+      list.appendChild(el);
+    }
+  });
+}
+
+/* ---------- Payments log ---------- */
+function renderPayments(){
+  document.getElementById('pmtDate').textContent=new Date().toLocaleDateString(lang==='en'?'en-US':'fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const orders=load('mpp_orders',[]).filter(o=>o.payment);
+  const body=document.getElementById('pmtBody');
+  const methods={cash:0,moncash:0,natcash:0,card:0};let tot=0;
+  orders.forEach(o=>{if(methods[o.payment]!==undefined)methods[o.payment]+=o.total;tot+=o.total;});
+  let cards=`<div class="stat sales" style="margin-bottom:12px"><div class="n">${tot.toLocaleString()} <span style="font-size:15px">GDES</span></div><div class="l">${t('d_sales').replace('jodi a','').replace('Today’s','').replace('du jour','')} · ${orders.length}</div></div>`;
+  cards+='<div class="stats" style="margin-bottom:14px">';
+  [['cash','💵'],['moncash','📱'],['natcash','📲'],['card','💳']].forEach(([m,e])=>{cards+=`<div class="stat"><div class="n" style="font-size:20px">${methods[m].toLocaleString()}</div><div class="l">${e} ${payLabel(m)}</div></div>`;});
+  cards+='</div>';
+  if(!orders.length){body.innerHTML=`<div class="empty"><div class="ee">💳</div>${t('empty')}</div>`;return;}
+  let rows='';
+  orders.slice().reverse().forEach(o=>{rows+=`<div class="order"><div class="top"><div><div class="who">${o.name}</div><div class="meta">${o.id} · ${payLabel(o.payment)} · ${fmtDate(o.ts)}</div></div><div class="amt2">${o.total.toLocaleString()} GDES</div></div></div>`;});
+  body.innerHTML=cards+rows;
+}
+
+/* ---------- Dashboard ---------- */
+function renderDash(){
+  document.getElementById('dashDate').textContent=new Date().toLocaleDateString(lang==='en'?'en-US':'fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const orders=load('mpp_orders',[]),logs=load('mpp_logs',[]),merch=load('mpp_merch',[]);
+  const todayOrders=orders.filter(o=>isToday(o.ts));
+  const activeDeliv=logs.filter(l=>l.status!=='deliv').length + orders.filter(o=>o.status==='out').length;
+  const salesToday=todayOrders.reduce((a,b)=>a+b.total,0);
+  const delivRev=todayOrders.reduce((a,b)=>a+(+b.deliveryFee||0),0)+logs.filter(l=>isToday(l.ts)).reduce((a,b)=>a+(+b.fee||0),0);
+  document.getElementById('dashStats').innerHTML=`
+    <div class="stat sales"><div class="n">${salesToday.toLocaleString()} <span style="font-size:16px">GDES</span></div><div class="l">${t('d_sales')}</div></div>
+    <div class="stat"><div class="n">${todayOrders.length}</div><div class="l">🛍️ ${t('d_orders')}</div></div>
+    <div class="stat"><div class="n" style="color:var(--blue)">${activeDeliv}</div><div class="l">🛵 ${t('d_active')}</div></div>
+    <div class="stat"><div class="n">${merch.length}</div><div class="l">🏪 ${t('d_merch')}</div></div>
+    <div class="stat rev"><div class="n">${delivRev.toLocaleString()} <span style="font-size:15px">GDES</span></div><div class="l">🚚 ${t('d_rev')}</div></div>`;
+}
+
+/* ---------- Settings ---------- */
+function renderSettings(){const s=getSet();document.getElementById('setBody').innerHTML=`
+  <label class="fl">${t('set_deliv')}</label><input type="number" id="set_deliv" value="${s.deliveryFee}">
+  <label class="fl">${t('set_svc')}</label><input type="number" id="set_svc" value="${s.svcPct}">`;}
+function saveSettings(){setSet({deliveryFee:+document.getElementById('set_deliv').value||0,svcPct:+document.getElementById('set_svc').value||0});
+  const btn=event.target,old=btn.textContent;btn.textContent='✓';setTimeout(()=>btn.textContent=old,900);}
+
+/* ---------- utils ---------- */
+function nowStamp(){return new Date().toISOString();}
+function fmtDate(iso){const d=new Date(iso);return d.toLocaleDateString(lang==='en'?'en-US':'fr-FR')+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+function isToday(iso){const d=new Date(iso),n=new Date();return d.toDateString()===n.toDateString();}
+
+/* ---------- language ---------- */
+document.querySelectorAll('.lang button').forEach(b=>{b.onclick=()=>{lang=b.dataset.lang;localStorage.setItem('mpp_lang',lang);
+  document.querySelectorAll('.lang button').forEach(x=>x.classList.toggle('on',x===b));applyI18n();
+  const cur=document.querySelector('.screen.on').id.replace('s-','');go(cur);};});
+
+/* ---------- boot ---------- */
+seedMerchants();
+document.querySelectorAll('.lang button').forEach(x=>x.classList.toggle('on',x.dataset.lang===lang));
+applyI18n(); refreshBadges();
+</script>
+</body>
+</html>
